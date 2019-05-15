@@ -1,7 +1,8 @@
 import networkx as nx
+import numpy as np
 
 from scipy.optimize import minimize
-from cirq import PauliString, Pauli
+from cirq import PauliString, Pauli, Simulator, GridQubit
 from .qaoa import QAOA
 from .pauli_operations import CirqPauliSum, add_pauli_strings
 
@@ -106,3 +107,77 @@ class CirqMaxCutSolver:
                          vqe_options=self.vqe_option)
 
         return qaoa_inst
+
+
+def define_grid_qubits(length=2):
+        """
+        defines qubits on a grid of given length
+
+        Parameters
+        ----------
+        length  :       length of the grid. Default=2 ,i.e, a grid containing four qubits
+                        (0,0), (0,1), (1,0) and (1,1)
+
+        Returns
+        -------
+        a list of qubits defined on a grid of given length
+        """
+        return [GridQubit(i, j) for i in range(length) for j in range(length)]
+
+
+def create_input_graph(qubits=[(GridQubit(0, 0), GridQubit(0, 1))], number_of_vertices=2):
+        """
+        creates a graph as a list of qubit pairs for the given number of vertices
+
+        Parameters
+        ----------
+        qubits                  :       list of GridQubits defined on a grid. Default is 
+                                        one pair of qubits (0,0) and (0,1) representing a
+                                        two vertex graph
+        number_of_vertices      :       number of vertices the input graph must contain. Default=2
+
+        Returns
+        -------
+        a list of qubit pairs representing a graph containing the given number of vertices
+        """
+        if len(qubits) == 1:
+                return qubits
+
+        return [(qubits[i % number_of_vertices], qubits[(i+1) % number_of_vertices]) for i in range(number_of_vertices)]
+
+
+def display_maxcut_results(qaoa_instance, maxcut_result):
+        """
+        displays results in the form of states and corresponding probabilities from solving 
+        the maxcut problem using QAOA represented by the input qaoa_instance
+
+        Parameters
+        ----------
+        qaoa_instance   :       a QAOA object containing all information about the problem instance on which
+                                QAOA is to be applied
+        maxcut_result   :       the result obtained from solving the maxcut problem on an input graph 
+        """
+        print("State\tProbability")
+        for state_index in range(qaoa_instance.nstates):
+                print(qaoa_instance.states[state_index], "\t", np.conj(
+                    maxcut_result.final_state[state_index])*maxcut_result.final_state[state_index])
+
+
+def solve_maxcut(graph, steps=1):
+        """
+        solves the maxcut problem on the input graph
+
+        Parameters
+        ----------
+        graph   :       list of qubit pairs representing the graph on which maxcut is to be solved
+        steps   :       the number of mixing and cost function steps to use. Default=1 
+        """
+        cirqMaxCutSolver = CirqMaxCutSolver(graph=graph, steps=steps)
+        qaoa_instance = cirqMaxCutSolver.solve_max_cut_qaoa()
+        betas, gammas = qaoa_instance.get_angles()
+        t = np.hstack((betas, gammas))
+        param_circuit = qaoa_instance.get_parameterized_circuit()
+        circuit = param_circuit(t)
+        sim = Simulator()
+        result = sim.simulate(circuit)
+        display_maxcut_results(qaoa_instance, result)
