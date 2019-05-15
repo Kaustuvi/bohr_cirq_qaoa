@@ -7,42 +7,42 @@ from .pauli_operations import exponentiate_pauli_string
 from .vqe import VQE
 
 
-class QAOA(object):
+class QAOA:
+    """
+    Quantum Approximate Optimization Algoirthm (QAOA)
+
+    Contains all information for running the QAOA algorthm to find the
+    ground state of the list of cost clauses.
+
+    Parameters
+    ----------
+
+    qubits              :   (list of cirq GridQubits) The number of qubits to use for the algorithm.
+    steps               :   (int) The number of mixing and cost function steps to use.
+                                Default=1.
+    cost_ham            :   list of clauses in the cost function. Must be
+                                CirqPauliSum objects
+    ref_ham             :   list of clauses in the mixer function. Must be
+                                CirqPauliSum objects
+    driver_ref          :   (cirq.Circuit()) object to define state prep
+                                for the starting state of the QAOA algorithm.
+                                Defaults to tensor product of |+> states.
+    minimizer           :   (Optional) Minimization function to pass to the
+                                Variational-Quantum-Eigensolver method
+    minimizer_kwargs    :   (Optional) (dict) of optional arguments to pass to
+                                the minimizer.  Default={}.
+    vqe_options         :   (optional) arguents for VQE run.
+
+    References
+    ----------
+    Farhi, Edward & Goldstone, Jeffrey & Gutmann, Sam. (2014).
+    A Quantum Approximate Optimization Algorithm.
+    <https://arxiv.org/abs/1411.4028>
+    """
+
     def __init__(self, qubits, steps=1, cost_ham=None, ref_ham=None,
                  driver_ref=None, minimizer=None, minimizer_kwargs=None,
                  vqe_options=None):
-        """
-        Quantum Approximate Optimization Algoirthm (QAOA)
-
-        Contains all information for running the QAOA algorthm to find the
-        ground state of the list of cost clauses.
-
-        Parameters
-        ----------
-
-        qubits              :   (list of cirq GridQubits) The number of qubits to use for the algorithm.
-        steps               :   (int) The number of mixing and cost function steps to use.
-                                Default=1.
-        cost_ham            :   list of clauses in the cost function. Must be
-                                CirqPauliSum objects
-        ref_ham             :   list of clauses in the mixer function. Must be
-                                CirqPauliSum objects
-        driver_ref          :   (cirq.Circuit()) object to define state prep
-                                for the starting state of the QAOA algorithm.
-                                Defaults to tensor product of |+> states.
-        minimizer           :   (Optional) Minimization function to pass to the
-                                Variational-Quantum-Eigensolver method
-        minimizer_kwargs    :   (Optional) (dict) of optional arguments to pass to
-                                the minimizer.  Default={}.
-        vqe_options         :   (optional) arguents for VQE run.
-
-        References
-        ----------
-        Farhi, Edward & Goldstone, Jeffrey & Gutmann, Sam. (2014). 
-        A Quantum Approximate Optimization Algorithm. 
-        <https://arxiv.org/abs/1411.4028>
-
-        """
         self.steps = steps
         self.qubits = qubits
         self.nstates = 2 ** len(qubits)
@@ -94,6 +94,24 @@ class QAOA(object):
     def get_parameterized_circuit(self):
         """
         Return a function that accepts parameters and returns a new cirq Circuit.
+
+        The code for this function has been copied from Rigetti's Grove project
+        https://github.com/rigetti/grove
+
+        With the original copyright disclaimer:
+        # Copyright 2016-2017 Rigetti Computing
+        #
+        #    Licensed under the Apache License, Version 2.0 (the "License");
+        #    you may not use this file except in compliance with the License.
+        #    You may obtain a copy of the License at
+        #
+        #        http://www.apache.org/licenses/LICENSE-2.0
+        #
+        #    Unless required by applicable law or agreed to in writing, software
+        #    distributed under the License is distributed on an "AS IS" BASIS,
+        #    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+        #    See the License for the specific language governing permissions and
+        #    limitations under the License.
 
         Returns
         -------

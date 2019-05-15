@@ -125,7 +125,7 @@ def define_grid_qubits(length=2):
         return [GridQubit(i, j) for i in range(length) for j in range(length)]
 
 
-def create_input_graph(qubits=[(GridQubit(0, 0), GridQubit(0, 1))], number_of_vertices=2):
+def define_graph(qubits=[(GridQubit(0, 0), GridQubit(0, 1))], number_of_vertices=2):
         """
         creates a graph as a list of qubit pairs for the given number of vertices
 
