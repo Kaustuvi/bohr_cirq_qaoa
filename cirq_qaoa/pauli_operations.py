@@ -7,7 +7,7 @@ from cirq import PauliString, Circuit, GridQubit, inverse, InsertStrategy, ZPowG
 
 class CirqPauliSum:
     """
-    CirqPauliSum is a utitlity class that adds PauliStrings according to Pauli algebra rules
+    CirqPauliSum is an utitlity class that adds PauliStrings according to Pauli algebra rules
     """
 
     def __init__(self, pauli_strings):

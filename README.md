@@ -1,6 +1,6 @@
 # Cirq QAOA
 ### Introduction
-The goal of this experiment was to implement the **Quantum Approximate Optimization Algorithm (QAOA)** by *Edward Farhi, Jeffrey Goldstone and Sam Gutmann* in the **Cirq framework** from Google. As an application, this implmentation was used to solve the Maximum Cut problem. 
+The goal of this project was to implement the **Quantum Approximate Optimization Algorithm (QAOA)** by *Edward Farhi, Jeffrey Goldstone and Sam Gutmann* in the **Cirq framework** from Google. As an application, this implmentation was used to solve the Maximum Cut problem. 
 
 ### References
 - The original [QAOA paper](https://arxiv.org/abs/1411.4028)
