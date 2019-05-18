@@ -106,7 +106,7 @@ class VQE(object):
 
             Parameters
             ----------
-            params  :   (ndarray) vector of parameters for generating the paramterized circuit.
+            params  :   (ndarray) vector of parameters for generating the parametrized circuit.
 
             Return
             ------
@@ -154,7 +154,7 @@ class VQE(object):
         generated from cirq_circuit.
         The expectation value is calculated by calculating <psi|O|psi>
 
-        Paramters
+        Parameters
         ---------
         all_qubits_in_circuit   :   (list) list of all qubits in cirq_circuit
         cirq_circuit            :   (Cirq circuit)
@@ -165,7 +165,7 @@ class VQE(object):
 
         Returns
         -------
-        (float)                 :   representing the expectation value of cirq_pauli_sum given
+        float                 :   representing the expectation value of cirq_pauli_sum given
                                     given the distribution generated from cirq_circuit.
         """
         if isinstance(cirq_pauli_sum, np.ndarray):

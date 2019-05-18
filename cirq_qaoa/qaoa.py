@@ -24,7 +24,7 @@ class QAOA:
                                 CirqPauliSum objects
     ref_ham             :   list of clauses in the mixer function. Must be
                                 CirqPauliSum objects
-    driver_ref          :   (cirq.Circuit()) object to define state prep
+    driver_ref          :   (cirq.Circuit object to define state prep
                                 for the starting state of the QAOA algorithm.
                                 Defaults to tensor product of |+> states.
     minimizer           :   (Optional) Minimization function to pass to the
@@ -45,7 +45,7 @@ class QAOA:
                  vqe_options=None):
         self.steps = steps
         self.qubits = qubits
-        self.nstates = 2 ** len(qubits)
+        self.number_of_states = 2 ** len(qubits)
         self.cost_ham = cost_ham or []
         self.ref_ham = ref_ham or []
 
@@ -66,7 +66,7 @@ class QAOA:
         self.initial_state = self.create_initial_state(driver_ref)
 
         self.states = [np.binary_repr(i, width=len(self.qubits))
-                       for i in range(self.nstates)]
+                       for i in range(self.number_of_states)]
 
     def create_initial_state(self, driver_ref):
         """
@@ -81,7 +81,7 @@ class QAOA:
 
         Returns
         -------
-        (cirq Circuit())    :   a Circuit object representing the initial state 
+        cirq Circuit()    :   a Circuit object representing the initial state 
         """
         if driver_ref is not None:
             return driver_ref
@@ -144,11 +144,11 @@ class QAOA:
 
             Parameters
             ----------
-            params              :   array of 2*steps angles, betas first, then gammas
+            params          :   array of 2*steps angles, betas first, then gammas
 
             Returns
             -------
-            (cirq Circuit())    :   a parameterized Circuit() object for the input parameters `params`
+            cirq Circuit    :   a parameterized Circuit object for the input parameters `params`
 
             """
             if len(params) != 2*self.steps:

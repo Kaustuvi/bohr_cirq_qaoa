@@ -49,7 +49,7 @@ class CirqMaxCutSolver:
 
         Returns
         -------
-        a Graph() object
+        a Graph object
         """
         if not isinstance(graph, nx.Graph) and isinstance(graph, list):
             maxcut_graph = nx.Graph()
@@ -109,20 +109,20 @@ class CirqMaxCutSolver:
         return qaoa_inst
 
 
-def define_grid_qubits(length=2):
+def define_grid_qubits(size=2):
         """
-        defines qubits on a grid of given length
+        defines qubits on a square grid of given size
 
         Parameters
         ----------
-        length  :       length of the grid. Default=2 ,i.e, a grid containing four qubits
+        size  :       size of the grid. Default=2 ,i.e, a grid containing four qubits
                         (0,0), (0,1), (1,0) and (1,1)
 
         Returns
         -------
-        a list of qubits defined on a grid of given length
+        a list of qubits defined on a grid of given size
         """
-        return [GridQubit(i, j) for i in range(length) for j in range(length)]
+        return [GridQubit(i, j) for i in range(size) for j in range(size)]
 
 
 def define_graph(qubits=[(GridQubit(0, 0), GridQubit(0, 1))], number_of_vertices=2):
@@ -158,7 +158,7 @@ def display_maxcut_results(qaoa_instance, maxcut_result):
         maxcut_result   :       the result obtained from solving the maxcut problem on an input graph 
         """
         print("State\tProbability")
-        for state_index in range(qaoa_instance.nstates):
+        for state_index in range(qaoa_instance.number_of_states):
                 print(qaoa_instance.states[state_index], "\t", np.conj(
                     maxcut_result.final_state[state_index])*maxcut_result.final_state[state_index])
 

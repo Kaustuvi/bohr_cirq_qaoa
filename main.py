@@ -4,9 +4,9 @@ from cirq_qaoa.cirq_max_cut_solver import define_grid_qubits, define_graph, solv
 
 
 def main():
-        length = 2
+        size = 2
         steps = 2
-        qubits = define_grid_qubits(length=length)
+        qubits = define_grid_qubits(size=size)
         input_graph = [(qubits[0], qubits[1]), (qubits[0], qubits[2]), (qubits[0], qubits[3]),
                        (qubits[1], qubits[2]), (qubits[1], qubits[3]), (qubits[2], qubits[3])]
         solve_maxcut(graph=input_graph, steps=steps)
