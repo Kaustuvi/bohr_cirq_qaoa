@@ -18,19 +18,18 @@ class CirqMaxCutSolver:
 
     Parameters
     ----------
-    steps               :   (int) The number of mixing and cost function steps to use. Default=1
-    graph               :   (list of GridQubit tuples) list of qubit pairs representing the nodes of
-                            the graph on which Maxcut is to be solved
-    minimizer_kwargs    :   (Optional) (dict) of optional arguments to pass to
-                            the minimizer.  Default={}.
-    vqe_option          :   (optional) arguents for VQE run.
+    steps               :   (int) number of mixing and cost function steps to use. Default=1
+    qubit_pairs         :   (list of GridQubit pairs) represents the edges of the graph on which Maxcut 
+                            is to be solved
+    minimizer_kwargs    :   (optional) (dict) arguments to pass to the minimizer.  Default={}.
+    vqe_option          :   (optional) arguments for VQE run.
     """
 
-    def __init__(self, graph, steps=1, minimizer_kwargs=None,
+    def __init__(self, qubit_pairs, steps=1, minimizer_kwargs=None,
                  vqe_option=None):
 
         self.steps = steps
-        self.graph = self.create_input_graph(graph=graph)
+        self.graph = self.create_input_graph(qubit_pairs=qubit_pairs)
         self.cost_operators = self.create_cost_operators()
         self.driver_operators = self.create_driver_operators()
 
@@ -39,32 +38,32 @@ class CirqMaxCutSolver:
                                                                  'disp': False}}
         self.vqe_option = vqe_option or {'disp': print_fun, 'return_all': True}
 
-    def create_input_graph(self, graph):
+    def create_input_graph(self, qubit_pairs):
         """
-        create graph from input list of nodes
+        Creates graph from list of GridQubit pairs
 
         Parameters
         ----------
-        graph   :   list of GridQubits representing nodes of the graph to be constructed
+        qubit_pairs     :   (list of GridQubit pairs) representing edges of the graph to be constructed
 
         Returns
         -------
-        a Graph object
+        graph           :   (Graph object) represents the graph containing edges defined in qubit_pairs
         """
-        if not isinstance(graph, nx.Graph) and isinstance(graph, list):
+        if not isinstance(qubit_pairs, nx.Graph) and isinstance(qubit_pairs, list):
             maxcut_graph = nx.Graph()
-            for edge in graph:
-                maxcut_graph.add_edge(*edge)
+            for qubit_pair in qubit_pairs:
+                maxcut_graph.add_edge(*qubit_pair)
         graph = maxcut_graph.copy()
         return graph
 
     def create_cost_operators(self):
         """
-        create family of phase separation operators that depend on the objective function to be optimized
+        Creates family of phase separation operators that depend on the objective function to be optimized
 
         Returns
         -------
-        list of cost clauses for the graph on which Maxcut needs to be solved
+        cost_operators  :   (list) cost clauses for the graph on which Maxcut needs to be solved
         """
         cost_operators = []
         for i, j in self.graph.edges():
@@ -80,11 +79,11 @@ class CirqMaxCutSolver:
 
     def create_driver_operators(self):
         """
-        create family of mixing operators that depend on the domain of the problem and its structure
+        Creates family of mixing operators that depend on the domain of the problem and its structure
 
         Returns
         -------
-        list of mixing clauses for the graph on which Maxcut needs to be solved
+        driver_operators    :   (list) mixing clauses for the graph on which Maxcut needs to be solved
         """
         driver_operators = []
         for i in self.graph.nodes():
@@ -95,11 +94,12 @@ class CirqMaxCutSolver:
 
     def solve_max_cut_qaoa(self):
         """
-        initialzes a QAOA object with the required information for performing Maxcut on the input graph
+        Initialzes a QAOA object with the required information for performing Maxcut on the input graph
 
         Returns
         -------
-        a QAOA instance
+        qaoa_inst   :   (QAOA object) represents all information for running the QAOA algorthm to find the
+                        ground state of the list of cost clauses. 
         """
         qaoa_inst = QAOA(list(self.graph.nodes()), steps=self.steps, cost_ham=self.cost_operators,
                          ref_ham=self.driver_operators, minimizer=minimize,
@@ -111,34 +111,35 @@ class CirqMaxCutSolver:
 
 def define_grid_qubits(size=2):
         """
-        defines qubits on a square grid of given size
+        Defines qubits on a square grid of given size
 
         Parameters
         ----------
-        size  :       size of the grid. Default=2 ,i.e, a grid containing four qubits
+        size    :       (int) size of the grid. Default=2 ,i.e, a grid containing four qubits
                         (0,0), (0,1), (1,0) and (1,1)
 
         Returns
         -------
-        a list of qubits defined on a grid of given size
+        a list of GridQubits defined on a grid of given size
         """
         return [GridQubit(i, j) for i in range(size) for j in range(size)]
 
 
 def define_graph(qubits=[(GridQubit(0, 0), GridQubit(0, 1))], number_of_vertices=2):
         """
-        creates a graph as a list of qubit pairs for the given number of vertices
+        Creates a cycle graph as a list of GridQubit pairs for the given number of vertices
 
         Parameters
         ----------
-        qubits                  :       list of GridQubits defined on a grid. Default is 
+        qubits                  :       (list of GridQubits). Default is 
                                         one pair of qubits (0,0) and (0,1) representing a
                                         two vertex graph
-        number_of_vertices      :       number of vertices the input graph must contain. Default=2
+        number_of_vertices      :       (int) number of vertices the cycle graph must contain. 
+                                        Default=2
 
         Returns
         -------
-        a list of qubit pairs representing a graph containing the given number of vertices
+        a list of GridQubit pairs representing a cycle graph containing the given number of vertices
         """
         if len(qubits) == 1:
                 return qubits
@@ -148,14 +149,14 @@ def define_graph(qubits=[(GridQubit(0, 0), GridQubit(0, 1))], number_of_vertices
 
 def display_maxcut_results(qaoa_instance, maxcut_result):
         """
-        displays results in the form of states and corresponding probabilities from solving 
+        Displays results in the form of states and corresponding probabilities from solving 
         the maxcut problem using QAOA represented by the input qaoa_instance
 
         Parameters
         ----------
-        qaoa_instance   :       a QAOA object containing all information about the problem instance on which
+        qaoa_instance   :       (QAOA object) contains all information about the problem instance on which
                                 QAOA is to be applied
-        maxcut_result   :       the result obtained from solving the maxcut problem on an input graph 
+        maxcut_result   :       (SimulationTrialResults object) obtained from solving the maxcut problem on an input graph 
         """
         print("State\tProbability")
         for state_index in range(qaoa_instance.number_of_states):
@@ -163,16 +164,17 @@ def display_maxcut_results(qaoa_instance, maxcut_result):
                     maxcut_result.final_state[state_index])*maxcut_result.final_state[state_index])
 
 
-def solve_maxcut(graph, steps=1):
+def solve_maxcut(qubit_pairs, steps=1):
         """
-        solves the maxcut problem on the input graph
+        Solves the maxcut problem on the input graph
 
         Parameters
         ----------
-        graph   :       list of qubit pairs representing the graph on which maxcut is to be solved
-        steps   :       the number of mixing and cost function steps to use. Default=1 
+        qubit_pairs :       (list of GridQubit pairs) represents the graph on which maxcut is to be solved
+        steps       :       (int) number of mixing and cost function steps to use. Default=1 
         """
-        cirqMaxCutSolver = CirqMaxCutSolver(graph=graph, steps=steps)
+        cirqMaxCutSolver = CirqMaxCutSolver(
+            qubit_pairs=qubit_pairs, steps=steps)
         qaoa_instance = cirqMaxCutSolver.solve_max_cut_qaoa()
         betas, gammas = qaoa_instance.get_angles()
         t = np.hstack((betas, gammas))

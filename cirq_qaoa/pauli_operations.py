@@ -32,16 +32,17 @@ class CirqPauliSum:
 
 def add_pauli_strings(pauli_strings):
     """
-    adds PauliString objects and returns a CirqPauliSum object simplified
+    Adds PauliString objects and returns a CirqPauliSum object simplified
     according to Pauli algebra rules
 
     Parameters
     ----------
-    pauli_strings   :   [list of PauliString objects] whose sum is to be calculated
+    pauli_strings   :   (list of PauliString objects) represents the Pauli terms whose 
+                        sum is to be calculated
 
     Returns
     -------
-    CirqPauliSum object simplified according to Pauli algebra rules
+    CirqPauliSum object that contains the sum of PauliString objects according to Pauli algebra rules
     """
 
     sum_of_pauli_strings = CirqPauliSum(pauli_strings)
@@ -50,16 +51,16 @@ def add_pauli_strings(pauli_strings):
 
 def simplify_cirq_pauli_sum(cirq_pauli_sum):
     """
-    simplifies the input CirqPauliSum object according to Pauli algebra rules
+    Simplifies the input CirqPauliSum object according to Pauli algebra rules
     
     Parameters
     ----------
-    cirq_pauli_sum  :   CirqPauliSum object that needs to be simplified according to 
+    cirq_pauli_sum  :   (CirqPauliSum object) represents the objects that needs to be simplified according to 
                         Pauli algebra rules
                 
     Returns
     -------
-    simplified CirqPauliSum object
+    CirqPauliSum object simplified according to Pauli algebra rules
     """
 
     pauli_strings = []
@@ -79,22 +80,23 @@ def simplify_cirq_pauli_sum(cirq_pauli_sum):
 
 def exponentiate_pauli_string(pauli_string):
     """
-    Returns a function f(alpha) that constructs the Circuit corresponding to exp(-1j*alpha*pauli_string).
+    Returns a function f(param) that constructs the Circuit corresponding to exp(-1j*param*pauli_string).
 
     Parameters
     ----------
-    pauli_string    :   A PauliString to exponentiate
+    pauli_string                :   (PauliString object) represents the Pauli term to exponentiate
 
     Returns
     -------
-    A function that takes an angle parameter and returns a circuit.
+    exponentiation_circuit()    :   (function) a function that returns a parameterized circuit corresponding
+                                    to the exponential of the input `pauli_string`.
     """
     coeff = pauli_string.coefficient.real
     pauli_string._coefficient = pauli_string.coefficient.real
 
     def exponentiation_circuit(param):
         circuit = Circuit()
-        if is_identity(pauli_string):
+        if is_constant(pauli_string):
             PHASE = ZPowGate(exponent=(-param * coeff)/np.pi)
             circuit.append([X(GridQubit(0, 0))],
                            strategy=InsertStrategy.EARLIEST)
@@ -115,17 +117,18 @@ def exponentiate_pauli_string(pauli_string):
 
 def exponentiate_general_case(pauli_string, param):
     """
-    Returns a cirq (Circuit()) object corresponding to the exponential of
-    the pauli_string object, i.e. exp[-1.0j * param * pauli_string]
+    Returns a Circuit object corresponding to the exponential of the `pauli_string` object, 
+    i.e. exp(-1.0j * param * pauli_string)
 
     Parameters:
     ----------
-    pauli_string    :   A PauliString to exponentiate
-    param           :   scalar, non-complex, value
+    pauli_string    :   (PauliString object) represents the Pauli term to exponentiate
+    param           :   (float) scalar, non-complex, value
 
     Returns:
     -------
-    A cirq Circuit object
+    circuit         :   (Circuit) represents a parameterized circuit corresponding to the exponential of 
+                        the input `pauli_string` and parameter `param`
     """
     def reverse_circuit_operations(c):
         reverse_circuit = Circuit()
@@ -140,7 +143,6 @@ def exponentiate_general_case(pauli_string, param):
             reverse_circuit.append(
                 [operation], strategy=InsertStrategy.EARLIEST)
         return reverse_circuit
-
     circuit = Circuit()
     change_to_z_basis = Circuit()
     change_to_original_basis = Circuit()
@@ -188,7 +190,7 @@ def is_zero(pauli_string):
 
     Parameters
     ----------
-    pauli_string    :   a PauliString object
+    pauli_string    :   (PauliString object) a PauliString object which is to be checked
 
     Returns
     -------
@@ -200,13 +202,13 @@ def is_zero(pauli_string):
         raise TypeError("is_zero only checks PauliString objects!")
 
 
-def is_identity(pauli_string):
+def is_constant(pauli_string):
     """
     Checks if a PauliString is a scalar multiple of identity
 
     Parameters
     ----------
-    pauli_string    :   a PauliString object
+    pauli_string    :   (PauliString object) a PauliString object which is to be checked
 
     Returns
     -------
@@ -215,4 +217,4 @@ def is_identity(pauli_string):
     if isinstance(pauli_string, PauliString):
         return (len(pauli_string) == 0) and (not np.isclose(pauli_string.coefficient, 0))
     else:
-        raise TypeError("is_identity only checks PauliString objects!")
+        raise TypeError("is_constant only checks PauliString objects!")

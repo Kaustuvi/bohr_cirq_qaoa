@@ -19,7 +19,7 @@ class OptResults(dict):
     __delattr__ = dict.__delitem__
 
 
-class VQE(object):
+class VQE:
     """
     The Variational-Quantum-Eigensolver algorithm
 
@@ -29,27 +29,9 @@ class VQE(object):
     vector of parameters and returns a Cirq circuit, and a
     Hamiltonian of which to calculate the expectation value.
 
-    The code for VQE is copied from Rigetti's Grove project
-    https://github.com/rigetti/grove
-
-    With the original copyright disclaimer:
-    # Copyright 2016-2017 Rigetti Computing
-    #
-    #    Licensed under the Apache License, Version 2.0 (the "License");
-    #    you may not use this file except in compliance with the License.
-    #    You may obtain a copy of the License at
-    #
-    #        http://www.apache.org/licenses/LICENSE-2.0
-    #
-    #    Unless required by applicable law or agreed to in writing, software
-    #    distributed under the License is distributed on an "AS IS" BASIS,
-    #    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-    #    See the License for the specific language governing permissions and
-    #    limitations under the License.
-
     Parameters
     ----------
-    minimizer           :   function that minimizes objective f(obj, param). For
+    minimizer           :   (function) a function that minimizes objective f(obj, param). For
                             example the function scipy.optimize.minimize() needs
                             at least two parameters, the objective and an initial
                             point for the optimization.  The args for minimizer
@@ -66,12 +48,13 @@ class VQE(object):
     def vqe_run(self, all_qubits_in_circuit, variational_state_evolve, hamiltonian, initial_params,
                 disp=None, return_all=False):
         """
-        functional minimization loop.
+        Runs the VQE algorithm that minimizes the objective function for the cost hamiltonian 
+        of a parameterized circuit represented by `variational_state_evolve`
 
         Parameters
         ----------
         variational_state_evolve    :   function that takes a set of parameters 
-                                        and returns a Cirq Circuit.
+                                        and returns a Circuit object.
         hamiltonian                 :   (CirqPauliSum) object representing the hamiltonian 
                                         of which to take the expectation value.
         initial_params              :   (ndarray) vector of initial parameters for the 
@@ -84,7 +67,7 @@ class VQE(object):
 
         Returns
         -------
-        (vqe.OptResult())           :   The following fields are initialized in OptResult:
+        results                     :   (vqe.OptResult object) The following fields are initialized in OptResult:
                                         -x: set of betas and gammas (parameters for the ansatz)
                                         -fun: scalar value of the objective function
                                         -iteration_params   :   a list of all intermediate parameter vectors. Only
@@ -101,16 +84,16 @@ class VQE(object):
 
         def objective_function(params):
             """
-            Generates a parameterized circuit with the given parameters and calculates
+            Generates a parameterized circuit with the given parameters `params` and calculates
             the expectation value of the cost hamiltonian for the generated circuit
 
             Parameters
             ----------
-            params  :   (ndarray) vector of parameters for generating the parametrized circuit.
+            params      :   (ndarray) vector of parameters for generating the parametrized circuit.
 
             Return
             ------
-            (float) :   expectation value
+            mean_value  :   (float) expectation value of the cost hamiltonian for the generated circuit
             """
             cirq_circuit = variational_state_evolve(params)
             mean_value = self.expectation(
@@ -150,23 +133,23 @@ class VQE(object):
     @staticmethod
     def expectation(all_qubits_in_circuit, cirq_circuit, cirq_pauli_sum):
         """
-        Computes the expectation value of cirq_pauli_sum over the distribution
-        generated from cirq_circuit.
+        Computes the expectation value of `cirq_pauli_sum` over the distribution
+        generated from `cirq_circuit`.
         The expectation value is calculated by calculating <psi|O|psi>
 
         Parameters
         ---------
-        all_qubits_in_circuit   :   (list) list of all qubits in cirq_circuit
-        cirq_circuit            :   (Cirq circuit)
-        cirq_pauli_sum          :   (CirqPauliSum, ndarray) CirqPauliSum representing the 
-                                    operator of which to calculate the expectation value
+        all_qubits_in_circuit   :   (list) list of all qubits in `cirq_circuit`
+        cirq_circuit            :   (Circuit) represents the paramterized circuit for the ansatz 
+        cirq_pauli_sum          :   (CirqPauliSum or ndarray) CirqPauliSum representing the Pauli
+                                    operator for which the expectation value is to be calculated
                                     or a numpy matrix representing the Hamiltonian 
                                     tensored up to the appropriate size.
 
         Returns
         -------
-        float                 :   representing the expectation value of cirq_pauli_sum given
-                                    given the distribution generated from cirq_circuit.
+        expectation.real        :   (float) represents the expectation value of cirq_pauli_sum 
+                                    given the distribution generated from `cirq_circuit`.
         """
         if isinstance(cirq_pauli_sum, np.ndarray):
             simulator = Simulator()
@@ -197,6 +180,23 @@ class VQE(object):
 
     @staticmethod
     def calculate_expectation(all_qubits_in_circuit, cirq_circuit, operator_circuits):
+        """
+        Computes the expectation value according to the formula <psi|O|psi> where O is a Pauli operator
+        represented by the state generated from `operator_circuits` for which the expectation is to 
+        be calculated over psi where psi is the state generated from `cirq_circuit`
+
+        Parameters
+        ---------
+        all_qubits_in_circuit   :   (list) list of all qubits in `cirq_circuit`
+        cirq_circuit            :   (Circuit) represents the paramterized circuit for the ansatz 
+        operator_circuits       :   (list of Circuit objects) represents a circuit generated by 
+                                    applying a Pauli operator on a qubit.
+
+        Returns
+        -------
+        result_overlaps         :   (list) represents the expectation values of each Pauli operator in
+                                    `operator_circuits` given the state represented by `cirq_circuit`.
+        """
         simulator = Simulator()
         result_overlaps = []
         simulation_result = simulator.simulate(cirq_circuit)
@@ -217,6 +217,23 @@ class VQE(object):
 
     @staticmethod
     def modify_operator_circuit(all_qubits_in_circuit, operator_circuit):
+        """
+        Modifies the `operator_circuit` by appending the Identity operator for qubits on which 
+        no Pauli operator is applied so that the state represented by `operator_circuit` consists of
+        all qubits used in the algorithm. This is done to ensure that the calculation of expectation for the
+        Pauli operators does not run into unmatched dimension errors.
+
+        Parameters
+        ---------
+        all_qubits_in_circuit   :   (list) list of all qubits used in the algorithm
+        operator_circuits       :   (list of Circuit objects) represents a circuit generated by 
+                                    applying a Pauli operator on a qubit.
+
+        Returns
+        -------
+        operator_circuit        :   (Circuit object) represents the modified circuit with the Identity operator
+                                    appended for qubits that are not present in `operator_circuit`.
+        """
         for qubits_in_circuit in operator_circuit.all_qubits():
                 all_qubits_in_circuit.remove(qubits_in_circuit)
         for qubit in all_qubits_in_circuit:

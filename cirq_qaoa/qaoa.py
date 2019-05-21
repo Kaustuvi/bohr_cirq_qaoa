@@ -17,20 +17,19 @@ class QAOA:
     Parameters
     ----------
 
-    qubits              :   (list of cirq GridQubits) The number of qubits to use for the algorithm.
-    steps               :   (int) The number of mixing and cost function steps to use.
-                                Default=1.
-    cost_ham            :   list of clauses in the cost function. Must be
-                                CirqPauliSum objects
-    ref_ham             :   list of clauses in the mixer function. Must be
-                                CirqPauliSum objects
-    driver_ref          :   (cirq.Circuit object to define state prep
-                                for the starting state of the QAOA algorithm.
-                                Defaults to tensor product of |+> states.
-    minimizer           :   (Optional) Minimization function to pass to the
-                                Variational-Quantum-Eigensolver method
-    minimizer_kwargs    :   (Optional) (dict) of optional arguments to pass to
-                                the minimizer.  Default={}.
+    qubits              :   (list of GridQubits) number of qubits to use for the algorithm.
+    steps               :   (int) number of mixing and cost function steps to use.
+                            Default=1.
+    cost_ham            :   (list) clauses in the cost function. Must be
+                            CirqPauliSum objects
+    ref_ham             :   (list) clauses in the mixer function. Must be
+                            CirqPauliSum objects
+    driver_ref          :   (Circuit object) defines the starting state of the QAOA algorithm.
+                            Defaults to tensor product of |+> states.
+    minimizer           :   (optional) minimization function to pass to the
+                            Variational-Quantum-Eigensolver method
+    minimizer_kwargs    :   (optional) (dict) optional arguments to pass to
+                            the minimizer.  Default={}.
     vqe_options         :   (optional) arguents for VQE run.
 
     References
@@ -75,13 +74,13 @@ class QAOA:
 
         Parameters
         ----------
-        driver_ref          :   circuit representing the initial state. If driver_ref is None,
+        driver_ref          :   (Circuit object) circuit representing the initial state. If driver_ref is None,
                                 the function returns state representing equal superposition over
                                 all qubits
 
         Returns
         -------
-        cirq Circuit()    :   a Circuit object representing the initial state 
+        circuit             :   (Circuit object) represents the initial state for the QAOA algorithm
         """
         if driver_ref is not None:
             return driver_ref
@@ -93,35 +92,19 @@ class QAOA:
 
     def get_parameterized_circuit(self):
         """
-        Return a function that accepts parameters and returns a new cirq Circuit.
-
-        The code for this function has been copied from Rigetti's Grove project
-        https://github.com/rigetti/grove
-
-        With the original copyright disclaimer:
-        # Copyright 2016-2017 Rigetti Computing
-        #
-        #    Licensed under the Apache License, Version 2.0 (the "License");
-        #    you may not use this file except in compliance with the License.
-        #    You may obtain a copy of the License at
-        #
-        #        http://www.apache.org/licenses/LICENSE-2.0
-        #
-        #    Unless required by applicable law or agreed to in writing, software
-        #    distributed under the License is distributed on an "AS IS" BASIS,
-        #    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-        #    See the License for the specific language governing permissions and
-        #    limitations under the License.
+        Returns a function that accepts parameters and returns a new cirq Circuit.
 
         Returns
         -------
-        a function
+        parameterized_circuit() :   (function)  a function that constructs a parameterized circuit 
+                                    with the input parameters. With given parameters, the function returns
+                                    a circuit consisting of gates which take the paramters as rotation angles
 
         """
         cost_parametric_circuits = []
         driver_parametric_circuits = []
         iteration = 0
-        while iteration <= self.steps:
+        while iteration < self.steps:
             cost_list = []
             driver_list = []
             for cost_pauli_sum in self.cost_ham:
@@ -140,15 +123,16 @@ class QAOA:
 
         def parameterized_circuit(params):
             """
-            Construct a cirq Circuit for the vector (beta, gamma).
+            Constructs a Circuit for the array `params` containing angles (beta, gamma) for the optimal solution.
 
             Parameters
             ----------
-            params          :   array of 2*steps angles, betas first, then gammas
+            params                  :   (ndarray) contains 2*steps angles, betas first, then gammas
 
             Returns
             -------
-            cirq Circuit    :   a parameterized Circuit object for the input parameters `params`
+            parameterized_circuit   :   (Circuit object) parameterized Circuit object for 
+                                        the input parameters `params`
 
             """
             if len(params) != 2*self.steps:
@@ -156,7 +140,6 @@ class QAOA:
                     "params doesn't match the number of parameters set by `steps`")
             betas = params[:self.steps]
             gammas = params[self.steps:]
-
             circuit = Circuit()
             circuit += self.initial_state
             for i in range(self.steps):
@@ -171,12 +154,12 @@ class QAOA:
 
     def get_angles(self):
         """
-        Finds optimal betas and gammas with the quantum variational eigensolver method.
+        Finds optimal betas and gammas with the variational quantum eigensolver method.
 
         Returns
         -------
-        ([list], [list])    :   A tuple of the beta angles and the gamma
-                                angles for the optimal solution.
+        betas, gammas   :   (list, list) tuple of the beta angles and the gamma
+                            angles for the optimal solution.
 
         """
         stacked_params = np.hstack((self.betas, self.gammas))
