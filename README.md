@@ -22,13 +22,13 @@ The goal of this project was to implement the **Quantum Approximate Optimization
 -   `main.py`   :   runs an implementation of QAOA to solve the Max-Cut problem on an input graph
 
 ### Commit Hash and Disclaimer
-The implementation of QAOA in this project is based on Rigetti's implementation of QAOA in Rigetti's [Grove](https://github.com/rigetti/grove.git) project with the commit hash `dc6bf6ec63e8c435fe52b1e00f707d5ce4cdb9b3`
-The function `get_parameterized_circuit()` in `qaoa.py` and the code for the class `VQE` in `vqe.py` are copied from Grove with the original copyright disclaimer:
+The implementation of QAOA in this project is based on Rigetti's implementation of QAOA in Rigetti's [Grove](https://github.com/rigetti/grove.git) project with the commit hash `dc6bf6ec63e8c435fe52b1e00f707d5ce4cdb9b3`.  
+The function `get_parameterized_circuit()` in `qaoa.py` and the code for the class `VQE` in `vqe.py` are copied from Grove with the original copyright disclaimer:  
 
-Copyright 2016-2017 Rigetti Computing
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at  http://www.apache.org/licenses/LICENSE-2.0
+Copyright 2016-2017 Rigetti Computing  
+Licensed under the Apache License, Version 2.0 (the "License");  
+you may not use this file except in compliance with the License.  
+You may obtain a copy of the License at  http://www.apache.org/licenses/LICENSE-2.0  
 Unless required by applicable law or agreed to in writing, software distributed under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the specific language governing permissions and limitations under the License.
         
 ### Work in Progress
