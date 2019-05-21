@@ -18,7 +18,7 @@ The goal of this project was to implement the **Quantum Approximate Optimization
          `VQE` is an object that encapsulates the VQE algorithm (functional minimization). The main components of the VQE algorithm are a minimizer function for performing the functional minimization, a function that takes a vector of parameters and returns a Cirq circuit, and a Hamiltonian of which to calculate the expectation value.
          The code for implementing VQE is copied from Rigetti's [Grove](https://grove-docs.readthedocs.io/en/latest/) project
     -   `pauli_operations.py`   :   contains class `CirqPauliSum`
-         `CirqPauliSum` is a utitlity class that adds PauliStrings according to Pauli algebra rules. This file also contains the function `exponentiate_pauli_string()` for constructing a circuit corresponding to $$e^{-j*\alpha*term}$$ for the cost or mixing clause `term` and a parameter $$\alpha$$
+         `CirqPauliSum` is a utitlity class that adds PauliStrings according to Pauli algebra rules. This file also contains the function `exponentiate_pauli_string()` for constructing a circuit corresponding to ![equation](https://latex.codecogs.com/gif.latex?e%5E%7B-j*%5Calpha*term%7D) for the cost or mixing clause `term` and a parameter ![equation](https://latex.codecogs.com/gif.latex?%5Calpha)
 -   `main.py`   :   runs an implementation of QAOA to solve the Max-Cut problem on an input graph
 
 ### Work in Progress
