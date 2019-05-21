@@ -27,7 +27,7 @@ class VQE:
     minimization). The main components of the VQE algorithm are a minimizer
     function for performing the functional minimization, a function that takes a
     vector of parameters and returns a Cirq circuit, and a
-    Hamiltonian of which to calculate the expectation value.
+    Hamiltonian for which the expectation value is to be calculated.
 
     Parameters
     ----------
@@ -56,7 +56,7 @@ class VQE:
         variational_state_evolve    :   function that takes a set of parameters 
                                         and returns a Circuit object.
         hamiltonian                 :   (CirqPauliSum) object representing the hamiltonian 
-                                        of which to take the expectation value.
+                                        whose expectation value is calculated.
         initial_params              :   (ndarray) vector of initial parameters for the 
                                         optimization
         disp                        :   (optional, bool) display level. If True then each iteration 
